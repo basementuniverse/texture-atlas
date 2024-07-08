@@ -115,6 +115,49 @@ const walkRight = ContentManager.get('walk_right');
 // HTMLCanvasElement
 ```
 
+## Repeating sections
+
+If you've got lots of animation frames, it could be tedious to manually define all the regions. In this case, we can use repeating regions.
+
+```ts
+const textureAtlasOptions = {
+  relative: true,
+  width: 5,
+  height: 2,
+  regions: {
+    idle_left: { x: 0, y: 0 },
+    idle_right: { x: 0, y: 1 },
+    walk_left: {
+      x: 1,
+      y: 0,
+      repeat: 4,
+      repeatNameFormat: '{name}_{n}',
+    },
+    walk_right: {
+      x: 1,
+      y: 1,
+      repeat: 4,
+      repeatNameFormat: '{name}_{n}',
+    },
+  },
+};
+
+// ...call textureAtlas or use the content processor on the example image
+
+// {
+//   idle_left: HTMLCanvasElement,
+//   idle_right: HTMLCanvasElement,
+//   walk_left_1: HTMLCanvasElement,
+//   walk_left_2: HTMLCanvasElement,
+//   walk_left_3: HTMLCanvasElement,
+//   walk_left_4: HTMLCanvasElement,
+//   walk_right_1: HTMLCanvasElement,
+//   walk_right_2: HTMLCanvasElement,
+//   walk_right_3: HTMLCanvasElement,
+//   walk_right_4: HTMLCanvasElement,
+// }
+```
+
 ## Texture Atlas options
 
 ```ts
@@ -188,5 +231,40 @@ export type TextureAtlasRegion = {
    * - in relative mode this defaults to 1
    */
   height?: number;
+
+  /**
+   * If set to an integer greater than 0, repeat this region multiple times
+   *
+   * The resulting image names will be postfixed with -{n}
+   *
+   * (e.g. if the region name is 'test-animation' and repeat is set to 3, we
+   * will get 'test-animation-1', 'test-animation-2' and 'test-animation-3'
+   * in the result)
+   */
+  repeat?: number;
+
+  /**
+   * An optional offset for each repetition's cell
+   *
+   * If this is omitted, assume the repeat cells are arranged along the
+   * positive-x direction and use width as the stride size
+   *
+   * In absolute mode, this is measured in pixels
+   * In relative mode, this is measured in cells
+   */
+  repeatOffset?: {
+    x: number;
+    y: number;
+  };
+
+  /**
+   * The name format to use for repeating sections
+   *
+   * `{name}` will be replaced with the current region's name
+   * `{n}` will be replaced with the current repetition's index (1-based)
+   *
+   * Default is '{name}-{n}'
+   */
+  repeatNameFormat?: string;
 };
 ```

@@ -61,13 +61,45 @@ export type TextureAtlasRegion = {
      * - in relative mode this defaults to 1
      */
     height?: number;
+    /**
+     * If set to an integer greater than 0, repeat this region multiple times
+     *
+     * The resulting image names will be postfixed with -{n}
+     *
+     * (e.g. if the region name is 'test-animation' and repeat is set to 3, we
+     * will get 'test-animation-1', 'test-animation-2' and 'test-animation-3'
+     * in the result)
+     */
+    repeat?: number;
+    /**
+     * An optional offset for each repetition's cell
+     *
+     * If this is omitted, assume the repeat cells are arranged along the
+     * positive-x direction and use width as the stride size
+     *
+     * In absolute mode, this is measured in pixels
+     * In relative mode, this is measured in cells
+     */
+    repeatOffset?: {
+        x: number;
+        y: number;
+    };
+    /**
+     * The name format to use for repeating sections
+     *
+     * `{name}` will be replaced with the current region's name
+     * `{n}` will be replaced with the current repetition's index (1-based)
+     *
+     * Default is '{name}-{n}'
+     */
+    repeatNameFormat?: string;
 };
 export type TextureAtlasMap = Record<string, HTMLCanvasElement>;
 /**
  * Takes an image and some texture atlas options and returns a dictionary
  * of canvases indexed by region name
  */
-export declare function textureAtlas(image: HTMLImageElement, options?: Partial<TextureAtlasOptions>): TextureAtlasMap;
+export declare function textureAtlas(image: HTMLImageElement | HTMLCanvasElement, options?: Partial<TextureAtlasOptions>): TextureAtlasMap;
 /**
  * Content Manager Processor wrapper which allows the textureAtlas function
  * to be used as a processor in a Content Manager

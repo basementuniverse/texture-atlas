@@ -68,11 +68,47 @@ export type TextureAtlasRegion = {
    * - in relative mode this defaults to 1
    */
   height?: number;
+
+  /**
+   * If set to an integer greater than 0, repeat this region multiple times
+   *
+   * The resulting image names will be postfixed with -{n}
+   *
+   * (e.g. if the region name is 'test-animation' and repeat is set to 3, we
+   * will get 'test-animation-1', 'test-animation-2' and 'test-animation-3'
+   * in the result)
+   */
+  repeat?: number;
+
+  /**
+   * An optional offset for each repetition's cell
+   *
+   * If this is omitted, assume the repeat cells are arranged along the
+   * positive-x direction and use width as the stride size
+   *
+   * In absolute mode, this is measured in pixels
+   * In relative mode, this is measured in cells
+   */
+  repeatOffset?: {
+    x: number;
+    y: number;
+  };
+
+  /**
+   * The name format to use for repeating sections
+   *
+   * `{name}` will be replaced with the current region's name
+   * `{n}` will be replaced with the current repetition's index (1-based)
+   *
+   * Default is '{name}-{n}'
+   */
+  repeatNameFormat?: string;
 };
 
 export type TextureAtlasMap = Record<string, HTMLCanvasElement>;
 
-const defaultOptions: TextureAtlasOptions = {
+const DEFAULT_REPEATING_REGION_NAME_FORMAT = '{name}-{n}';
+const DEFAULT_OPTIONS: TextureAtlasOptions = {
   relative: true,
   width: 1,
   height: 1,
@@ -89,12 +125,12 @@ const defaultOptions: TextureAtlasOptions = {
  * of canvases indexed by region name
  */
 export function textureAtlas(
-  image: HTMLImageElement,
+  image: HTMLImageElement | HTMLCanvasElement,
   options?: Partial<TextureAtlasOptions>
 ): TextureAtlasMap {
   const actualOptions = Object.assign(
     {},
-    defaultOptions,
+    DEFAULT_OPTIONS,
     options ?? {}
   );
 
@@ -116,12 +152,6 @@ export function textureAtlas(
   const map: TextureAtlasMap = {};
 
   for (const [name, region] of Object.entries(actualOptions.regions)) {
-    const regionCanvas = document.createElement('canvas');
-    const regionContext = regionCanvas.getContext('2d');
-    if (!regionContext) {
-      throw new Error('Failed to get 2D context');
-    }
-
     const absoluteX = Math.floor(region.x * cellWidth);
     const absoluteY = Math.floor(region.y * cellHeight);
     const absoluteWidth = Math.ceil(
@@ -143,25 +173,93 @@ export function textureAtlas(
             : image.height - absoluteY)
     );
 
-    regionCanvas.width = absoluteWidth;
-    regionCanvas.height = absoluteHeight;
+    if (region.repeat && region.repeat > 0) {
+      for (let i = 0; i < region.repeat; i++) {
+        const repeatName = getRepeatingRegionName(
+          name,
+          i + 1,
+          region.repeatNameFormat
+        );
 
-    regionContext.drawImage(
-      image,
-      absoluteX,
-      absoluteY,
-      absoluteWidth,
-      absoluteHeight,
-      0,
-      0,
-      absoluteWidth,
-      absoluteHeight
-    );
+        let repeatOffsetX = Math.floor(
+          (
+            region.repeatOffset?.x !== undefined &&
+            region.repeatOffset?.x !== null
+          )
+            ? (actualOptions.relative
+                ? region.repeatOffset.x * cellWidth
+                : region.repeatOffset.x)
+            : cellWidth
+        );
+        let repeatOffsetY = Math.floor(
+          (
+            region.repeatOffset?.y !== undefined &&
+            region.repeatOffset?.y !== null
+          )
+            ? (actualOptions.relative
+                ? region.repeatOffset.y * cellHeight
+                : region.repeatOffset.y)
+            : 0
+        );
 
-    map[name] = regionCanvas;
+        map[repeatName] = chopRegion(
+          image,
+          absoluteX + repeatOffsetX * i,
+          absoluteY + repeatOffsetY * i,
+          absoluteWidth,
+          absoluteHeight
+        );
+      }
+    } else {
+      map[name] = chopRegion(
+        image,
+        absoluteX,
+        absoluteY,
+        absoluteWidth,
+        absoluteHeight
+      );
+    }
   }
 
   return map;
+}
+
+/**
+ * Chop a rectangular region from an image into a new canvas
+ */
+function chopRegion(
+  image: HTMLImageElement | HTMLCanvasElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  canvas.width = width;
+  canvas.height = height;
+
+  if (!context) {
+    throw new Error('Failed to get 2D context');
+  }
+
+  context.drawImage(image, x, y, width, height, 0, 0, width, height);
+
+  return canvas;
+}
+
+/**
+ * Get the name of a repeating region
+ */
+function getRepeatingRegionName(
+  regionName: string,
+  repetitionIndex: number,
+  regionNameFormat?: string
+): string {
+  return (regionNameFormat ?? DEFAULT_REPEATING_REGION_NAME_FORMAT)
+    .replace('{name}', regionName)
+    .replace('{n}', repetitionIndex.toString());
 }
 
 /**

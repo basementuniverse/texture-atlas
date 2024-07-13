@@ -8,21 +8,22 @@ export type TextureAtlasOptions = {
    * cell in the atlas)
    *
    * In non-relative (absolute) mode, the width and height properties
-   * represent the size of a cell in the atlas, measured in pixels
+   * won't be used, instead each region should define a position and size
+   * measured in pixels
    */
   relative: boolean;
 
   /**
-   * The width of the texture atlas (measured in cells) or the width of
-   * a cell in the atlas (measured in pixels), depending on relative or
-   * absolute mode
+   * The width of the texture atlas, measured in cells
+   *
+   * Not used in absolute mode
    */
   width: number;
 
   /**
-   * The height of the texture atlas (measured in cells) or the height
-   * of a cell in the atlas (measured in pixels), depending on relative
-   * or absolute mode
+   * The height of the texture atlas, measured in cells
+   *
+   * Not used in absolute mode
    */
   height: number;
 
@@ -34,6 +35,15 @@ export type TextureAtlasOptions = {
    * as the name of each image in the Content Manager
    */
   regions: Record<string, TextureAtlasRegion>;
+
+  /**
+   * Define a margin between each cell, measured in pixels
+   *
+   * Only used in relative mode
+   *
+   * Default is 0
+   */
+  cellMargin: number;
 };
 
 export type TextureAtlasRegion = {
@@ -54,8 +64,8 @@ export type TextureAtlasRegion = {
    * relative or absolute mode
    *
    * If not defined:
-   * - in absolute mode use the remaining width of the image
    * - in relative mode this defaults to 1
+   * - in absolute mode use the remaining width of the image
    */
   width?: number;
 
@@ -64,8 +74,8 @@ export type TextureAtlasRegion = {
    * relative or absolute mode
    *
    * If not defined:
-   * - in absolute mode use the remaining height of the image
    * - in relative mode this defaults to 1
+   * - in absolute mode use the remaining height of the image
    */
   height?: number;
 
@@ -86,8 +96,8 @@ export type TextureAtlasRegion = {
    * If this is omitted, assume the repeat cells are arranged along the
    * positive-x direction and use width as the stride size
    *
-   * In absolute mode, this is measured in pixels
    * In relative mode, this is measured in cells
+   * In absolute mode, this is measured in pixels
    */
   repeatOffset?: {
     x: number;
@@ -118,6 +128,7 @@ const DEFAULT_OPTIONS: TextureAtlasOptions = {
       y: 0,
     },
   },
+  cellMargin: 0,
 };
 
 /**
@@ -144,16 +155,16 @@ export function textureAtlas(
 
   const cellWidth = actualOptions.relative
     ? Math.ceil(image.width / actualOptions.width)
-    : actualOptions.width;
+    : 1;
   const cellHeight = actualOptions.relative
     ? Math.ceil(image.height / actualOptions.height)
-    : actualOptions.height;
+    : 1;
 
   const map: TextureAtlasMap = {};
 
   for (const [name, region] of Object.entries(actualOptions.regions)) {
-    const absoluteX = Math.floor(region.x * cellWidth);
-    const absoluteY = Math.floor(region.y * cellHeight);
+    let absoluteX = Math.floor(region.x * cellWidth);
+    let absoluteY = Math.floor(region.y * cellHeight);
     const absoluteWidth = Math.ceil(
       region.width
         ? (actualOptions.relative
@@ -172,6 +183,11 @@ export function textureAtlas(
             ? cellHeight
             : image.height - absoluteY)
     );
+
+    if (actualOptions.relative && actualOptions.cellMargin > 0) {
+      absoluteX += Math.floor(actualOptions.cellMargin * (region.x + 1));
+      absoluteY += Math.floor(actualOptions.cellMargin * (region.y + 1));
+    }
 
     if (region.repeat && region.repeat > 0) {
       for (let i = 0; i < region.repeat; i++) {
@@ -201,6 +217,22 @@ export function textureAtlas(
                 : region.repeatOffset.y)
             : 0
         );
+
+        if (actualOptions.relative && actualOptions.cellMargin > 0) {
+          if (
+            region.repeatOffset?.x !== undefined &&
+            region.repeatOffset?.x !== null
+          ) {
+            repeatOffsetX += Math.floor(actualOptions.cellMargin * i + 1);
+          }
+
+          if (
+            region.repeatOffset?.y !== undefined &&
+            region.repeatOffset?.y !== null
+          ) {
+            repeatOffsetY += Math.floor(actualOptions.cellMargin * i + 1);
+          }
+        }
 
         map[repeatName] = chopRegion(
           image,
@@ -275,7 +307,12 @@ export async function textureAtlasContentProcessor(
     content: any;
     status: number;
   }>,
-  data: TextureAtlasOptions,
+  data: {
+    name: string;
+    type: string;
+    content: TextureAtlasOptions;
+    status: number;
+  },
   imageName: string
 ): Promise<void> {
   const image = content[imageName]?.content;
@@ -283,7 +320,7 @@ export async function textureAtlasContentProcessor(
     throw new Error(`Image '${imageName}' not found`);
   }
 
-  const map = textureAtlas(image as HTMLImageElement, data);
+  const map = textureAtlas(image as HTMLImageElement, data.content);
 
   for (const [name, canvas] of Object.entries(map)) {
     content[name] = {

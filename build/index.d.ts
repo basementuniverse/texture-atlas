@@ -8,19 +8,20 @@ export type TextureAtlasOptions = {
      * cell in the atlas)
      *
      * In non-relative (absolute) mode, the width and height properties
-     * represent the size of a cell in the atlas, measured in pixels
+     * won't be used, instead each region should define a position and size
+     * measured in pixels
      */
     relative: boolean;
     /**
-     * The width of the texture atlas (measured in cells) or the width of
-     * a cell in the atlas (measured in pixels), depending on relative or
-     * absolute mode
+     * The width of the texture atlas, measured in cells
+     *
+     * Not used in non-relative (absolute) mode
      */
     width: number;
     /**
-     * The height of the texture atlas (measured in cells) or the height
-     * of a cell in the atlas (measured in pixels), depending on relative
-     * or absolute mode
+     * The height of the texture atlas, measured in cells
+     *
+     * Not used in non-relative (absolute) mode
      */
     height: number;
     /**
@@ -111,4 +112,9 @@ export declare function textureAtlasContentProcessor(content: Record<string, {
     type: string;
     content: any;
     status: number;
-}>, data: TextureAtlasOptions, imageName: string): Promise<void>;
+}>, data: {
+    name: string;
+    type: string;
+    content: TextureAtlasOptions;
+    status: number;
+}, imageName: string): Promise<void>;

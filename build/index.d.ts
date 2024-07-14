@@ -10,18 +10,20 @@ export type TextureAtlasOptions = {
      * In non-relative (absolute) mode, the width and height properties
      * won't be used, instead each region should define a position and size
      * measured in pixels
+     *
+     * Default is true
      */
     relative: boolean;
     /**
      * The width of the texture atlas, measured in cells
      *
-     * Not used in non-relative (absolute) mode
+     * Not used in absolute mode
      */
     width: number;
     /**
      * The height of the texture atlas, measured in cells
      *
-     * Not used in non-relative (absolute) mode
+     * Not used in absolute mode
      */
     height: number;
     /**
@@ -32,6 +34,16 @@ export type TextureAtlasOptions = {
      * as the name of each image in the Content Manager
      */
     regions: Record<string, TextureAtlasRegion>;
+    /**
+     * Define a margin between each cell, measured in pixels
+     *
+     * Adjacent margins are collapsed
+     *
+     * Only used in relative mode
+     *
+     * Default is 0
+     */
+    cellMargin: number;
 };
 export type TextureAtlasRegion = {
     /**
@@ -49,8 +61,8 @@ export type TextureAtlasRegion = {
      * relative or absolute mode
      *
      * If not defined:
-     * - in absolute mode use the remaining width of the image
      * - in relative mode this defaults to 1
+     * - in absolute mode use the remaining width of the image
      */
     width?: number;
     /**
@@ -58,8 +70,8 @@ export type TextureAtlasRegion = {
      * relative or absolute mode
      *
      * If not defined:
-     * - in absolute mode use the remaining height of the image
      * - in relative mode this defaults to 1
+     * - in absolute mode use the remaining height of the image
      */
     height?: number;
     /**
@@ -78,8 +90,8 @@ export type TextureAtlasRegion = {
      * If this is omitted, assume the repeat cells are arranged along the
      * positive-x direction and use width as the stride size
      *
-     * In absolute mode, this is measured in pixels
      * In relative mode, this is measured in cells
+     * In absolute mode, this is measured in pixels
      */
     repeatOffset?: {
         x: number;

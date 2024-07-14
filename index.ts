@@ -10,6 +10,8 @@ export type TextureAtlasOptions = {
    * In non-relative (absolute) mode, the width and height properties
    * won't be used, instead each region should define a position and size
    * measured in pixels
+   *
+   * Default is true
    */
   relative: boolean;
 
@@ -38,6 +40,8 @@ export type TextureAtlasOptions = {
 
   /**
    * Define a margin between each cell, measured in pixels
+   *
+   * Adjacent margins are collapsed
    *
    * Only used in relative mode
    *
@@ -153,19 +157,28 @@ export function textureAtlas(
     throw new Error('No regions defined');
   }
 
-  const cellWidth = actualOptions.relative
-    ? Math.ceil(image.width / actualOptions.width)
-    : 1;
-  const cellHeight = actualOptions.relative
-    ? Math.ceil(image.height / actualOptions.height)
-    : 1;
+  let cellWidth = 1;
+  let cellHeight = 1;
+
+  if (actualOptions.relative) {
+    let imageWidth = image.width;
+    let imageHeight = image.height;
+
+    if (actualOptions.cellMargin > 0) {
+      imageWidth -= actualOptions.cellMargin;
+      imageHeight -= actualOptions.cellMargin;
+    }
+
+    cellWidth = Math.ceil(imageWidth / actualOptions.width);
+    cellHeight = Math.ceil(imageHeight / actualOptions.height);
+  }
 
   const map: TextureAtlasMap = {};
 
   for (const [name, region] of Object.entries(actualOptions.regions)) {
     let absoluteX = Math.floor(region.x * cellWidth);
     let absoluteY = Math.floor(region.y * cellHeight);
-    const absoluteWidth = Math.ceil(
+    let absoluteWidth = Math.ceil(
       region.width
         ? (actualOptions.relative
             ? region.width * cellWidth
@@ -174,7 +187,7 @@ export function textureAtlas(
             ? cellWidth
             : image.width - absoluteX)
     );
-    const absoluteHeight = Math.ceil(
+    let absoluteHeight = Math.ceil(
       region.height
         ? (actualOptions.relative
             ? region.height * cellHeight
@@ -185,8 +198,11 @@ export function textureAtlas(
     );
 
     if (actualOptions.relative && actualOptions.cellMargin > 0) {
-      absoluteX += Math.floor(actualOptions.cellMargin * (region.x + 1));
-      absoluteY += Math.floor(actualOptions.cellMargin * (region.y + 1));
+      absoluteX += actualOptions.cellMargin;
+      absoluteY += actualOptions.cellMargin;
+
+      absoluteWidth -= actualOptions.cellMargin;
+      absoluteHeight -= actualOptions.cellMargin;
     }
 
     if (region.repeat && region.repeat > 0) {
@@ -217,22 +233,6 @@ export function textureAtlas(
                 : region.repeatOffset.y)
             : 0
         );
-
-        if (actualOptions.relative && actualOptions.cellMargin > 0) {
-          if (
-            region.repeatOffset?.x !== undefined &&
-            region.repeatOffset?.x !== null
-          ) {
-            repeatOffsetX += Math.floor(actualOptions.cellMargin * i + 1);
-          }
-
-          if (
-            region.repeatOffset?.y !== undefined &&
-            region.repeatOffset?.y !== null
-          ) {
-            repeatOffsetY += Math.floor(actualOptions.cellMargin * i + 1);
-          }
-        }
 
         map[repeatName] = chopRegion(
           image,
@@ -275,6 +275,9 @@ function chopRegion(
   if (!context) {
     throw new Error('Failed to get 2D context');
   }
+
+  context.fillStyle = 'yellow';
+  context.fillRect(0, 0, width, height);
 
   context.drawImage(image, x, y, width, height, 0, 0, width, height);
 

@@ -276,9 +276,6 @@ function chopRegion(
     throw new Error('Failed to get 2D context');
   }
 
-  context.fillStyle = 'yellow';
-  context.fillRect(0, 0, width, height);
-
   context.drawImage(image, x, y, width, height, 0, 0, width, height);
 
   return canvas;

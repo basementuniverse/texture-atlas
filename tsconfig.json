@@ -19,7 +19,8 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "esModuleInterop": true,
-    "inlineSourceMap": true,
+    "inlineSourceMap": false,
+    "sourceMap": false
   },
   "include": ["index.ts"]
 }

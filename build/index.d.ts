@@ -127,6 +127,6 @@ export declare function textureAtlasContentProcessor(content: Record<string, {
 }>, data: {
     name: string;
     type: string;
-    content: TextureAtlasOptions;
+    content: any;
     status: number;
 }, imageName: string): Promise<void>;

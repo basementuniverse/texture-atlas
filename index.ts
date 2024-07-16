@@ -310,7 +310,7 @@ export async function textureAtlasContentProcessor(
   data: {
     name: string;
     type: string;
-    content: TextureAtlasOptions;
+    content: any;
     status: number;
   },
   imageName: string
@@ -320,7 +320,10 @@ export async function textureAtlasContentProcessor(
     throw new Error(`Image '${imageName}' not found`);
   }
 
-  const map = textureAtlas(image as HTMLImageElement, data.content);
+  const map = textureAtlas(
+    image as HTMLImageElement,
+    data.content as TextureAtlasOptions
+  );
 
   for (const [name, canvas] of Object.entries(map)) {
     content[name] = {

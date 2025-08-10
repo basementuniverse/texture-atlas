@@ -45,6 +45,7 @@ export type TextureAtlasOptions = {
      */
     cellMargin: number;
 };
+export declare function isTextureAtlasOptions(value: unknown): value is TextureAtlasOptions;
 export type TextureAtlasRegion = {
     /**
      * X-offset for this region, measured in cells or pixels, depending on
@@ -107,6 +108,7 @@ export type TextureAtlasRegion = {
      */
     repeatNameFormat?: string;
 };
+export declare function isTextureAtlasRegion(value: unknown): value is TextureAtlasRegion;
 export type TextureAtlasMap = Record<string, HTMLCanvasElement>;
 /**
  * Takes an image and some texture atlas options and returns a dictionary

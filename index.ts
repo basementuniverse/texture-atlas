@@ -50,6 +50,36 @@ export type TextureAtlasOptions = {
   cellMargin: number;
 };
 
+export function isTextureAtlasOptions(value: unknown): value is TextureAtlasOptions {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  if (!('relative' in value) || typeof (value as any).relative !== 'boolean') {
+    return false;
+  }
+  if (!('width' in value) || typeof (value as any).width !== 'number') {
+    return false;
+  }
+  if (!('height' in value) || typeof (value as any).height !== 'number') {
+    return false;
+  }
+  if (!('regions' in value) || typeof (value as any).regions !== 'object') {
+    return false;
+  }
+  for (const [key, region] of Object.entries((value as any).regions)) {
+    if (typeof key !== 'string') {
+      return false;
+    }
+    if (!isTextureAtlasRegion(region)) {
+      return false;
+    }
+  }
+  if (!('cellMargin' in value) || typeof (value as any).cellMargin !== 'number') {
+    return false;
+  }
+  return true;
+}
+
 export type TextureAtlasRegion = {
   /**
    * X-offset for this region, measured in cells or pixels, depending on
@@ -118,6 +148,46 @@ export type TextureAtlasRegion = {
    */
   repeatNameFormat?: string;
 };
+
+export function isTextureAtlasRegion(value: unknown): value is TextureAtlasRegion {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  if (!('x' in value) || typeof (value as any).x !== 'number') {
+    return false;
+  }
+  if (!('y' in value) || typeof (value as any).y !== 'number') {
+    return false;
+  }
+  if ('width' in value && typeof (value as any).width !== 'number') {
+    return false;
+  }
+  if ('height' in value && typeof (value as any).height !== 'number') {
+    return false;
+  }
+  if ('repeat' in value && typeof (value as any).repeat !== 'number') {
+    return false;
+  }
+  if ('repeatOffset' in value) {
+    const repeatOffset = (value as any).repeatOffset;
+    if (!repeatOffset || typeof repeatOffset !== 'object') {
+      return false;
+    }
+    if (!('x' in repeatOffset) || typeof repeatOffset.x !== 'number') {
+      return false;
+    }
+    if (!('y' in repeatOffset) || typeof repeatOffset.y !== 'number') {
+      return false;
+    }
+  }
+  if (
+    'repeatNameFormat' in value &&
+    typeof (value as any).repeatNameFormat !== 'string'
+  ) {
+    return false;
+  }
+  return true;
+}
 
 export type TextureAtlasMap = Record<string, HTMLCanvasElement>;
 
@@ -315,6 +385,10 @@ export async function textureAtlasContentProcessor(
   },
   imageName: string
 ): Promise<void> {
+  if (!isTextureAtlasOptions(data.content)) {
+    throw new Error('Invalid texture atlas options');
+  }
+
   const image = content[imageName]?.content;
   if (!image) {
     throw new Error(`Image '${imageName}' not found`);
@@ -322,7 +396,7 @@ export async function textureAtlasContentProcessor(
 
   const map = textureAtlas(
     image as HTMLImageElement,
-    data.content as TextureAtlasOptions
+    data.content
   );
 
   for (const [name, canvas] of Object.entries(map)) {

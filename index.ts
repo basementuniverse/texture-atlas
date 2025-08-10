@@ -51,7 +51,7 @@ export type TextureAtlasOptions = {
    *
    * Default is 0
    */
-  cellMargin: number;
+  cellMargin?: number;
 };
 
 export type TextureAtlasRegion = {
@@ -129,7 +129,9 @@ export type TextureAtlasMap = Record<string, HTMLCanvasElement>;
 // TYPE GUARDS
 // -----------------------------------------------------------------------------
 
-export function isTextureAtlasOptions(value: unknown): value is TextureAtlasOptions {
+export function isTextureAtlasOptions(
+  value: unknown
+): value is TextureAtlasOptions {
   if (!value || typeof value !== 'object') {
     return false;
   }
@@ -153,13 +155,15 @@ export function isTextureAtlasOptions(value: unknown): value is TextureAtlasOpti
       return false;
     }
   }
-  if (!('cellMargin' in value) || typeof (value as any).cellMargin !== 'number') {
+  if ('cellMargin' in value && typeof (value as any).cellMargin !== 'number') {
     return false;
   }
   return true;
 }
 
-export function isTextureAtlasRegion(value: unknown): value is TextureAtlasRegion {
+export function isTextureAtlasRegion(
+  value: unknown
+): value is TextureAtlasRegion {
   if (!value || typeof value !== 'object') {
     return false;
   }
@@ -229,11 +233,7 @@ export function textureAtlas(
   image: HTMLImageElement | HTMLCanvasElement,
   options?: Partial<TextureAtlasOptions>
 ): TextureAtlasMap {
-  const actualOptions = Object.assign(
-    {},
-    DEFAULT_OPTIONS,
-    options ?? {}
-  );
+  const actualOptions = Object.assign({}, DEFAULT_OPTIONS, options ?? {});
 
   if (actualOptions.width <= 0 || actualOptions.height <= 0) {
     throw new Error('Width and height must be greater than 0');
@@ -250,9 +250,10 @@ export function textureAtlas(
     let imageWidth = image.width;
     let imageHeight = image.height;
 
-    if (actualOptions.cellMargin > 0) {
-      imageWidth -= actualOptions.cellMargin;
-      imageHeight -= actualOptions.cellMargin;
+    const cellMargin = actualOptions.cellMargin ?? 0;
+    if (cellMargin > 0) {
+      imageWidth -= cellMargin;
+      imageHeight -= cellMargin;
     }
 
     cellWidth = Math.ceil(imageWidth / actualOptions.width);
@@ -266,29 +267,30 @@ export function textureAtlas(
     let absoluteY = Math.floor(region.y * cellHeight);
     let absoluteWidth = Math.ceil(
       region.width
-        ? (actualOptions.relative
-            ? region.width * cellWidth
-            : region.width)
-        : (actualOptions.relative
-            ? cellWidth
-            : image.width - absoluteX)
+        ? actualOptions.relative
+          ? region.width * cellWidth
+          : region.width
+        : actualOptions.relative
+        ? cellWidth
+        : image.width - absoluteX
     );
     let absoluteHeight = Math.ceil(
       region.height
-        ? (actualOptions.relative
-            ? region.height * cellHeight
-            : region.height)
-        : (actualOptions.relative
-            ? cellHeight
-            : image.height - absoluteY)
+        ? actualOptions.relative
+          ? region.height * cellHeight
+          : region.height
+        : actualOptions.relative
+        ? cellHeight
+        : image.height - absoluteY
     );
 
-    if (actualOptions.relative && actualOptions.cellMargin > 0) {
-      absoluteX += actualOptions.cellMargin;
-      absoluteY += actualOptions.cellMargin;
+    const cellMargin = actualOptions.cellMargin ?? 0;
+    if (actualOptions.relative && cellMargin > 0) {
+      absoluteX += cellMargin;
+      absoluteY += cellMargin;
 
-      absoluteWidth -= actualOptions.cellMargin;
-      absoluteHeight -= actualOptions.cellMargin;
+      absoluteWidth -= cellMargin;
+      absoluteHeight -= cellMargin;
     }
 
     if (region.repeat && region.repeat > 0) {
@@ -300,23 +302,19 @@ export function textureAtlas(
         );
 
         let repeatOffsetX = Math.floor(
-          (
-            region.repeatOffset?.x !== undefined &&
+          region.repeatOffset?.x !== undefined &&
             region.repeatOffset?.x !== null
-          )
-            ? (actualOptions.relative
-                ? region.repeatOffset.x * cellWidth
-                : region.repeatOffset.x)
+            ? actualOptions.relative
+              ? region.repeatOffset.x * cellWidth
+              : region.repeatOffset.x
             : cellWidth
         );
         let repeatOffsetY = Math.floor(
-          (
-            region.repeatOffset?.y !== undefined &&
+          region.repeatOffset?.y !== undefined &&
             region.repeatOffset?.y !== null
-          )
-            ? (actualOptions.relative
-                ? region.repeatOffset.y * cellHeight
-                : region.repeatOffset.y)
+            ? actualOptions.relative
+              ? region.repeatOffset.y * cellHeight
+              : region.repeatOffset.y
             : 0
         );
 
@@ -391,12 +389,15 @@ function getRepeatingRegionName(
  * @see https://www.npmjs.com/package/@basementuniverse/content-manager
  */
 export async function textureAtlasContentProcessor(
-  content: Record<string, {
-    name: string;
-    type: string;
-    content: any;
-    status: string;
-  }>,
+  content: Record<
+    string,
+    {
+      name: string;
+      type: string;
+      content: any;
+      status: string;
+    }
+  >,
   data: {
     name: string;
     type: string;
@@ -414,10 +415,7 @@ export async function textureAtlasContentProcessor(
     throw new Error(`Image '${imageName}' not found`);
   }
 
-  const map = textureAtlas(
-    image as HTMLImageElement,
-    data.content
-  );
+  const map = textureAtlas(image as HTMLImageElement, data.content);
 
   for (const [name, canvas] of Object.entries(map)) {
     content[`${data.name}_${name}`] = {

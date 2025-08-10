@@ -43,7 +43,7 @@ export type TextureAtlasOptions = {
      *
      * Default is 0
      */
-    cellMargin: number;
+    cellMargin?: number;
 };
 export type TextureAtlasRegion = {
     /**

@@ -2,16 +2,19 @@
   "name": "@basementuniverse/texture-atlas",
   "version": "1.2.0",
   "description": "A component for chopping up images into multiple canvases",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
-  "scripts": {
-    "build": "webpack"
-  },
   "author": "Gordon Larrigan <gordonlarrigan@gmail.com> (https://gordonlarrigan.com)",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/basementuniverse/texture-atlas.git"
+  },
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "webpack"
   },
   "devDependencies": {
     "@types/node": "^18.11.12",

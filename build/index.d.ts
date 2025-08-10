@@ -45,7 +45,6 @@ export type TextureAtlasOptions = {
      */
     cellMargin: number;
 };
-export declare function isTextureAtlasOptions(value: unknown): value is TextureAtlasOptions;
 export type TextureAtlasRegion = {
     /**
      * X-offset for this region, measured in cells or pixels, depending on
@@ -108,8 +107,9 @@ export type TextureAtlasRegion = {
      */
     repeatNameFormat?: string;
 };
-export declare function isTextureAtlasRegion(value: unknown): value is TextureAtlasRegion;
 export type TextureAtlasMap = Record<string, HTMLCanvasElement>;
+export declare function isTextureAtlasOptions(value: unknown): value is TextureAtlasOptions;
+export declare function isTextureAtlasRegion(value: unknown): value is TextureAtlasRegion;
 /**
  * Takes an image and some texture atlas options and returns a dictionary
  * of canvases indexed by region name
@@ -125,10 +125,10 @@ export declare function textureAtlasContentProcessor(content: Record<string, {
     name: string;
     type: string;
     content: any;
-    status: number;
+    status: string;
 }>, data: {
     name: string;
     type: string;
     content: any;
-    status: number;
+    status: string;
 }, imageName: string): Promise<void>;

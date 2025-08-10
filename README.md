@@ -102,16 +102,17 @@ const characterSpriteSheet = ContentManager.get('character-spritesheet');
 const characterAtlasData = ContentManager.get('character-atlas');
 // object
 
-const idleLeft = ContentManager.get('idle_left');
+// Note that the content item names for each region prefixed with the atlas name
+const idleLeft = ContentManager.get('character-atlas_idle_left');
 // HTMLCanvasElement
 
-const idleRight = ContentManager.get('idle_right');
+const idleRight = ContentManager.get('character-atlas_idle_right');
 // HTMLCanvasElement
 
-const walkLeft = ContentManager.get('walk_left');
+const walkLeft = ContentManager.get('character-atlas_walk_left');
 // HTMLCanvasElement
 
-const walkRight = ContentManager.get('walk_right');
+const walkRight = ContentManager.get('character-atlas_walk_right');
 // HTMLCanvasElement
 ```
 

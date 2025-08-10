@@ -1,3 +1,7 @@
+// -----------------------------------------------------------------------------
+// TYPES
+// -----------------------------------------------------------------------------
+
 export type TextureAtlasOptions = {
   /**
    * In relative mode, the width and height of the texture atlas is
@@ -49,36 +53,6 @@ export type TextureAtlasOptions = {
    */
   cellMargin: number;
 };
-
-export function isTextureAtlasOptions(value: unknown): value is TextureAtlasOptions {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-  if (!('relative' in value) || typeof (value as any).relative !== 'boolean') {
-    return false;
-  }
-  if (!('width' in value) || typeof (value as any).width !== 'number') {
-    return false;
-  }
-  if (!('height' in value) || typeof (value as any).height !== 'number') {
-    return false;
-  }
-  if (!('regions' in value) || typeof (value as any).regions !== 'object') {
-    return false;
-  }
-  for (const [key, region] of Object.entries((value as any).regions)) {
-    if (typeof key !== 'string') {
-      return false;
-    }
-    if (!isTextureAtlasRegion(region)) {
-      return false;
-    }
-  }
-  if (!('cellMargin' in value) || typeof (value as any).cellMargin !== 'number') {
-    return false;
-  }
-  return true;
-}
 
 export type TextureAtlasRegion = {
   /**
@@ -149,6 +123,42 @@ export type TextureAtlasRegion = {
   repeatNameFormat?: string;
 };
 
+export type TextureAtlasMap = Record<string, HTMLCanvasElement>;
+
+// -----------------------------------------------------------------------------
+// TYPE GUARDS
+// -----------------------------------------------------------------------------
+
+export function isTextureAtlasOptions(value: unknown): value is TextureAtlasOptions {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  if (!('relative' in value) || typeof (value as any).relative !== 'boolean') {
+    return false;
+  }
+  if (!('width' in value) || typeof (value as any).width !== 'number') {
+    return false;
+  }
+  if (!('height' in value) || typeof (value as any).height !== 'number') {
+    return false;
+  }
+  if (!('regions' in value) || typeof (value as any).regions !== 'object') {
+    return false;
+  }
+  for (const [key, region] of Object.entries((value as any).regions)) {
+    if (typeof key !== 'string') {
+      return false;
+    }
+    if (!isTextureAtlasRegion(region)) {
+      return false;
+    }
+  }
+  if (!('cellMargin' in value) || typeof (value as any).cellMargin !== 'number') {
+    return false;
+  }
+  return true;
+}
+
 export function isTextureAtlasRegion(value: unknown): value is TextureAtlasRegion {
   if (!value || typeof value !== 'object') {
     return false;
@@ -189,7 +199,9 @@ export function isTextureAtlasRegion(value: unknown): value is TextureAtlasRegio
   return true;
 }
 
-export type TextureAtlasMap = Record<string, HTMLCanvasElement>;
+// -----------------------------------------------------------------------------
+// DEFAULTS
+// -----------------------------------------------------------------------------
 
 const DEFAULT_REPEATING_REGION_NAME_FORMAT = '{name}-{n}';
 const DEFAULT_OPTIONS: TextureAtlasOptions = {
@@ -204,6 +216,10 @@ const DEFAULT_OPTIONS: TextureAtlasOptions = {
   },
   cellMargin: 0,
 };
+
+// -----------------------------------------------------------------------------
+// FUNCTIONS
+// -----------------------------------------------------------------------------
 
 /**
  * Takes an image and some texture atlas options and returns a dictionary
@@ -364,6 +380,10 @@ function getRepeatingRegionName(
     .replace('{n}', repetitionIndex.toString());
 }
 
+// -----------------------------------------------------------------------------
+// CONTENT PROCESSOR
+// -----------------------------------------------------------------------------
+
 /**
  * Content Manager Processor wrapper which allows the textureAtlas function
  * to be used as a processor in a Content Manager
@@ -375,13 +395,13 @@ export async function textureAtlasContentProcessor(
     name: string;
     type: string;
     content: any;
-    status: number;
+    status: string;
   }>,
   data: {
     name: string;
     type: string;
     content: any;
-    status: number;
+    status: string;
   },
   imageName: string
 ): Promise<void> {
@@ -400,11 +420,11 @@ export async function textureAtlasContentProcessor(
   );
 
   for (const [name, canvas] of Object.entries(map)) {
-    content[name] = {
+    content[`${data.name}_${name}`] = {
       name,
       type: 'image',
       content: canvas,
-      status: 4,
+      status: 'processed',
     };
   }
 }

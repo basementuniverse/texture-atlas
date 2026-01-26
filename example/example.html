@@ -1,0 +1,315 @@
+<style>
+
+body {
+  background-color: #333;
+}
+
+canvas {
+  width: 800px;
+  height: 800px;
+  background-color: #222;
+  border: 3px black solid;
+  border-radius: 5px;
+  margin: 20px;
+}
+
+</style>
+<canvas></canvas>
+<script src="../build/index.js"></script>
+<script>
+
+const canvas = document.querySelector('canvas');
+const context = canvas.getContext('2d');
+
+canvas.width = 800;
+canvas.height = 800;
+
+// Packed
+let tileMap1 = null;
+const image1 = new Image();
+image1.src = './texture-atlas-packed.png';
+image1.onload = () => {
+  const tiles = textureAtlas(
+    image1,
+    {
+      relative: true,
+      width: 3,
+      height: 2,
+      regions: {
+        a: {
+          x: 0,
+          y: 0,
+        },
+        b: {
+          x: 1,
+          y: 0,
+        },
+        c: {
+          x: 2,
+          y: 0,
+        },
+        d: {
+          x: 0,
+          y: 1,
+        },
+        e: {
+          x: 1,
+          y: 1,
+        },
+        f: {
+          x: 2,
+          y: 1,
+        },
+      },
+    },
+  );
+
+  context.drawImage(tiles.a, 100, 100);
+  console.log('a', tiles.a.width, tiles.a.height);
+
+  context.drawImage(tiles.b, 200, 100);
+  console.log('b', tiles.b.width, tiles.b.height);
+
+  context.drawImage(tiles.c, 300, 100);
+  console.log('c', tiles.c.width, tiles.c.height);
+
+  context.drawImage(tiles.d, 400, 100);
+  console.log('d', tiles.d.width, tiles.d.height);
+
+  context.drawImage(tiles.e, 500, 100);
+  console.log('e', tiles.e.width, tiles.e.height);
+
+  context.drawImage(tiles.f, 600, 100);
+  console.log('f', tiles.f.width, tiles.f.height);
+};
+
+// Spaced
+let tileMap2 = null;
+const image2 = new Image();
+image2.src = './texture-atlas-spaced.png';
+image2.onload = () => {
+  const tiles = textureAtlas(
+    image2,
+    {
+      relative: true,
+      cellMargin: 10,
+      width: 3,
+      height: 2,
+      regions: {
+        a: {
+          x: 0,
+          y: 0,
+        },
+        b: {
+          x: 1,
+          y: 0,
+        },
+        c: {
+          x: 2,
+          y: 0,
+        },
+        d: {
+          x: 0,
+          y: 1,
+        },
+        e: {
+          x: 1,
+          y: 1,
+        },
+        f: {
+          x: 2,
+          y: 1,
+        },
+      },
+    },
+  );
+
+  context.drawImage(tiles.a, 100, 200);
+  console.log('a', tiles.a.width, tiles.a.height);
+
+  context.drawImage(tiles.b, 200, 200);
+  console.log('b', tiles.b.width, tiles.b.height);
+
+  context.drawImage(tiles.c, 300, 200);
+  console.log('c', tiles.c.width, tiles.c.height);
+
+  context.drawImage(tiles.d, 400, 200);
+  console.log('d', tiles.d.width, tiles.d.height);
+
+  context.drawImage(tiles.e, 500, 200);
+  console.log('e', tiles.e.width, tiles.e.height);
+
+  context.drawImage(tiles.f, 600, 200);
+  console.log('f', tiles.f.width, tiles.f.height);
+};
+
+// Absolute
+let tileMap3 = null;
+const image3 = new Image();
+image3.src = './texture-atlas-absolute.png';
+image3.onload = () => {
+  const tiles = textureAtlas(
+    image3,
+    {
+      relative: false,
+      regions: {
+        a: {
+          x: 10,
+          y: 33,
+          width: 64,
+          height: 64,
+        },
+        b: {
+          x: 110,
+          y: 21,
+          width: 64,
+          height: 64,
+        },
+        c: {
+          x: 174,
+          y: 21,
+          width: 64,
+          height: 64,
+        },
+        d: {
+          x: 43,
+          y: 105,
+          width: 64,
+          height: 64,
+        },
+        e: {
+          x: 107,
+          y: 105,
+          width: 64,
+          height: 64,
+        },
+        f: {
+          x: 171,
+          y: 105,
+          width: 64,
+          height: 64,
+        },
+      },
+    },
+  );
+
+  context.drawImage(tiles.a, 100, 300);
+  console.log('a', tiles.a.width, tiles.a.height);
+
+  context.drawImage(tiles.b, 200, 300);
+  console.log('b', tiles.b.width, tiles.b.height);
+
+  context.drawImage(tiles.c, 300, 300);
+  console.log('c', tiles.c.width, tiles.c.height);
+
+  context.drawImage(tiles.d, 400, 300);
+  console.log('d', tiles.d.width, tiles.d.height);
+
+  context.drawImage(tiles.e, 500, 300);
+  console.log('e', tiles.e.width, tiles.e.height);
+
+  context.drawImage(tiles.f, 600, 300);
+  console.log('f', tiles.f.width, tiles.f.height);
+};
+
+// Packed w/ cell sizes & repeating
+let tileMap4 = null;
+const image4 = new Image();
+image4.src = './texture-atlas-packed.png';
+image4.onload = () => {
+  const tiles = textureAtlas(
+    image4,
+    {
+      relative: true,
+      width: 3,
+      height: 2,
+      regions: {
+        a: {
+          x: 0,
+          y: 0,
+        },
+        bc: {
+          x: 1,
+          y: 0,
+          width: 2,
+        },
+        def: {
+          x: 0,
+          y: 1,
+          repeat: 3,
+        },
+      },
+    },
+  );
+
+  context.drawImage(tiles.a, 100, 400);
+  console.log('a', tiles.a.width, tiles.a.height);
+
+  context.drawImage(tiles.bc, 200, 400);
+  console.log('bc', tiles.bc.width, tiles.bc.height);
+
+  context.drawImage(tiles['def-1'], 400, 400);
+  console.log('def-1', tiles['def-1'].width, tiles['def-1'].height);
+
+  context.drawImage(tiles['def-2'], 500, 400);
+  console.log('def-2', tiles['def-2'].width, tiles['def-2'].height);
+
+  context.drawImage(tiles['def-3'], 600, 400);
+  console.log('def-3', tiles['def-3'].width, tiles['def-3'].height);
+};
+
+// Packed w/ repeating
+let tileMap5 = null;
+const image5 = new Image();
+image5.src = './texture-atlas-spaced.png';
+image5.onload = () => {
+  const tiles = textureAtlas(
+    image5,
+    {
+      relative: true,
+      width: 3,
+      height: 2,
+      cellMargin: 10,
+      regions: {
+        a: {
+          x: 0,
+          y: 0,
+        },
+        be: {
+          x: 1,
+          y: 0,
+          repeat: 2,
+          repeatOffset: {
+            x: 0,
+            y: 1,
+          },
+        },
+        def: {
+          x: 0,
+          y: 1,
+          repeat: 3,
+        },
+      },
+    },
+  );
+
+  context.drawImage(tiles.a, 100, 500);
+  console.log('a', tiles.a.width, tiles.a.height);
+
+  context.drawImage(tiles['be-1'], 200, 500);
+  console.log('be-1', tiles['be-1'].width, tiles['be-1'].height);
+
+  context.drawImage(tiles['be-2'], 300, 500);
+  console.log('be-2', tiles['be-2'].width, tiles['be-2'].height);
+
+  context.drawImage(tiles['def-1'], 400, 500);
+  console.log('def-1', tiles['def-1'].width, tiles['def-1'].height);
+
+  context.drawImage(tiles['def-2'], 500, 500);
+  console.log('def-2', tiles['def-2'].width, tiles['def-2'].height);
+
+  context.drawImage(tiles['def-3'], 600, 500);
+  console.log('def-3', tiles['def-3'].width, tiles['def-3'].height);
+};
+
+</script>
